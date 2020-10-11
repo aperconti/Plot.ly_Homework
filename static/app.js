@@ -7,6 +7,8 @@ d3.json("../data_samples.json").then((importedData) => {
         .data(importedData.names).enter()
         .append('option')
         .text(function (d) { return d; });
+
+    updatePlotly();
 });
 
 // Submit Button handler
@@ -16,7 +18,7 @@ function handleSubmit() {
 
     // Select the input value from the form
     var individual = d3.select("#selectID").node().value;
-    console.log(individual);
+    // console.log(individual);
 
     // clear the input value
     d3.select("#selectID").node().value = "";
@@ -39,15 +41,22 @@ function updatePlotly() {
     d3.json("../data_samples.json").then((importedData) => {
         for (var i = 0; i < importedData.samples.length; i++) {
             if (importedData.samples[i].id === individual) {
-                var data = importedData.samples[i];
+                var gauge = importedData.samples[i];
+                var meta = importedData.metadata[i];
                 break;
             }
         }
 
+        console.log(gauge);
+
+        // We need to sort 3 different arrays the same 'order', despite
+        // them having no connection to each other.
+        // Using answer from: https://stackoverflow.com/a/11499391
+
         // 1) 'zip' the arrays together, so that we can sort them:
         var zipped_list = [];
-        for (var j = 0; j < data.sample_values.length; j++) {
-            zipped_list.push({ 'sample_values': data.sample_values[j], 'otu_ids': data.otu_ids[j], 'otu_labels': data.otu_labels[j] });
+        for (var j = 0; j < gauge.sample_values.length; j++) {
+            zipped_list.push({ 'sample_values': gauge.sample_values[j], 'otu_ids': gauge.otu_ids[j], 'otu_labels': gauge.otu_labels[j] });
         }
 
         // Verify lists have been zipped
@@ -57,19 +66,21 @@ function updatePlotly() {
         //    We then "grab" the top 10 using slice(0, 10)
         zipped_list = zipped_list.sort(function (a, b) {
             return b.sample_values - a.sample_values;
-        }).slice(0, 10).reverse();
+        });
 
         // Verify everything looks ok
         // console.log(zipped_list);
 
         var sample_values = []
         var otu_ids = []
+        var otu_ids_num = []
         var otu_labels = []
         //3) separate them back out:
         for (var k = 0; k < zipped_list.length; k++) {
-            sample_values[k] = zipped_list[k].sample_values;
-            otu_ids[k] = "OTU " + zipped_list[k].otu_ids;
-            otu_labels[k] = zipped_list[k].otu_labels;
+            sample_values.push(zipped_list[k].sample_values);
+            otu_ids.push("OTU " + zipped_list[k].otu_ids);
+            otu_ids_num.push(zipped_list[k].otu_ids);
+            otu_labels.push(zipped_list[k].otu_labels.split(";").join("<br>"));
         }
 
         // console.log(sample_values)
@@ -77,8 +88,8 @@ function updatePlotly() {
         // console.log(otu_labels)
 
         var trace1 = {
-            x: sample_values,
-            y: otu_ids,
+            x: sample_values.slice(0, 10).reverse(),
+            y: otu_ids.slice(0, 10).reverse(),
             type: "bar",
             orientation: "h"
         };
@@ -89,26 +100,69 @@ function updatePlotly() {
         // // Render the plot to the div tag with id "plot"
         Plotly.newPlot("bar", chartData);
 
-
         var trace2 = {
-            x: otu_ids,
+            x: otu_ids_num,
             y: sample_values,
-            // test: "",
-            // text: otu_ids,
+            text: otu_labels,
             // name: "Greek",
             type: "bubble",
-            mode: 'markers'
-            // orientation: "h"
+            mode: 'markers',
+            // orientation: "h",
+            marker: {
+                size: sample_values,
+                sizemode: 'diameter',
+                color: otu_ids_num,
+                colorscale: 'Portland',
+                type: 'heatmap'
+            }
         };
 
         // data
-        var data = [trace2];
+        var gauge = [trace2];
 
         // // Render the plot to the div tag with id "plot"
-        Plotly.newPlot("bubble", data);
+        Plotly.newPlot("bubble", gauge);
+
+        // // adding data to metadata
+        function buildTable(data) {
+            // Remove table if it exists
+            var deleteTable = d3.select("#table");
+            deleteTable.remove();
+
+            var table = d3.select("#sample-metadata").append('table');
+            table.attr('class', 'table').attr('class', 'table-condensed');
+            table.attr('id', 'table')
+            var tbody = table.append("tbody");
+            var trow;
+            for (const [key, value] of Object.entries(data)) {
+                trow = tbody.append("tr");
+                var td = trow.append("td").append("b");
+                td.text(`${key}:`);
+                trow.append("td").text(value);
+
+            }
+        }
+
+        buildTable(meta);
+
+
+        var gauge = [
+	{
+		domain: { x: [0, 1], y: [0, 1] },
+		value: 270,
+		title: { text: "Speed" },
+		type: "indicator",
+		mode: "gauge+number"
+	}
+];
+
+var layout = { width: 600, height: 500, margin: { t: 0, b: 0 } };
+        Plotly.newPlot('gauge', gauge, layout);
+
+
     });
 
     // Add event listener for submit button
     d3.select("#submit").on("click", handleSubmit);
-};
 
+};
