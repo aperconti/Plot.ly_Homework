@@ -38,7 +38,7 @@ function updatePlotly() {
 
     // Use D3 fetch to read the JSON file
     // The data from the JSON file is arbitrarily named importedData as the argument
-    d3.json("../data_samples.json").then((importedData) => {
+    d3.json("./data_samples.json").then((importedData) => {
         for (var i = 0; i < importedData.samples.length; i++) {
             if (importedData.samples[i].id === individual) {
                 var gauge = importedData.samples[i];
