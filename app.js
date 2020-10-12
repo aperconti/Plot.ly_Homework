@@ -1,4 +1,4 @@
-d3.json("../data_samples.json").then((importedData) => {
+d3.json("./data_samples.json").then((importedData) => {
 
     var select = d3.select('#selectID');
 
