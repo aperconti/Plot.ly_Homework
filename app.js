@@ -155,7 +155,23 @@ function updatePlotly() {
                 type: "indicator",
                 mode: "gauge+number+delta",
                 gauge: {
-                    'axis': { 'visible': true }
+                    // axis: { range: [null, 9] },
+                    axis: { range: [null, 9], tickwidth: 1, tickcolor: "#2E0854"},
+                    bar: { color: "2E0854" },
+                    steps: [
+                        { range: [0, 1], color: "#FFE1FF" },
+                        { range: [1, 2], color: "#ECC8EC" },
+                        { range: [2, 3], color: "#EAADEA" },
+                        { range: [3, 4], color: "#DDA0DD" },
+                        { range: [4, 5], color: "#CD96CD" },
+                        { range: [5, 6], color: "#8B668B" },
+                        { range: [6, 7], color: "#754C78" },
+                        { range: [7, 8], color: "#4F2F4F" },
+                        { range: [8, 9], color: "#2E0854" }
+
+                    ],
+                // gauge: {
+                //     'axis': { 'visible': true }
                 }
             }
         ];
