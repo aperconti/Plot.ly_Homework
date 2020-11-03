@@ -1,15 +1,17 @@
 ## Project Overview:
-Tools/Requirements
+#### Tools/Requirements:
 The tools used for this project are:
 
-Bootstrap
-Javascript
-json
-Plotly
+Bootstrap,
+Javascript,
+json,
+Plotly,
 
 ## Environment requirements:
-bootstrap === 3.3.7
-plotly.js === v1.57.1
+bootstrap === 3.3.7,
+
+plotly.js === v1.57.1,
+
 d3.js === 5.5.0
 
 
